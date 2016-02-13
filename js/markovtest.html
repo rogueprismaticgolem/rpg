@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <script src='markov.js'></script>
+        <script>
+            function captureForm(){
+                var amount = parseInt(document.getElementById("amount").value);
+                var source = document.getElementById("source").value;
+                console.log(amount);
+                document.getElementById('output').innerHTML = generateText(source, amount);
+                return false;
+            }
+        </script>
+    </head>
+    <body>
+        <textarea form-"markov" name='source' rows='20' cols='80' id='source' wrap='soft'></textarea>
+            <form id='markov' onSubmit='return captureForm();' >
+            <input type='text' name='amount' id='amount' value='100' />
+            <input type='submit'></input>
+            </form>
+            <div id='output'></div>
+    </body>
+</html>
