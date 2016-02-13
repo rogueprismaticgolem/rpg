@@ -1,29 +1,44 @@
 
 var markovMap = {};
 
-function populateMap(source){
+function populateMap(source, chainlength){
     markovMap = {}; // start fresh
     var s = source.replace(/\s+/g, " "); // turn all whitespace into a single space.
     var words = s.split(" ");
-    var w1 = words.shift()
-    var w2 = words.shift()
+    var keys = [];
+
+    if (words.length <= chainlength){
+        throw "Chain Length is too short at " + chainlength + " with " + words.length + " words in the source.";
+    }
+
+    for (var j = 0; j < chainlength; ++j){
+        keys.push(words.shift());
+    }
     var l = words.length;
     for (var i = 0; i < l; i++){
         wx = words[i];
-        insertElement(w1,w2,wx);
-        w1 = w2;
-        w2 = wx;
+        insertElement(keys,wx);
+        keys.shift();
+        keys.push(wx);
     }
 }
 
-function insertElement(w1, w2, wx) {
-    if (!(w1 in markovMap)){
-        markovMap[w1] = {}
+function insertElement(keys, wx, chainlength) {
+    var obj = markovMap;
+    for (var i = 0; i < keys.length - 1; ++i) {
+        var key = keys[i];
+        if (!(key in obj)) {
+            obj[key] = {}
+        }
+        obj = obj[key];
     }
-    if (!(w2 in markovMap[w1])) {
-        markovMap[w1][w2] = [];
+
+    var lastKey = keys[keys.length -1];
+    if (!(lastKey in obj)){
+        obj[lastKey] = [];
     }
-    markovMap[w1][w2].push(wx);
+
+    obj[lastKey].push(wx);
 }
 
 // This comes from here:
@@ -47,26 +62,35 @@ function pickRandomWord(arr) {
     return result;
 }
 
-function getNextWord(w1, w2) {
-    if (!(w1 in markovMap)) {
-        return pickRandomProperty(markovMap);
-    }
-    obj1 = markovMap[w1];
-    if (!(w2 in obj1)) {
-        return pickRandomProperty(obj1);
-    }
-
-    return pickRandomWord(obj1[w2]);
+function pickRandom(thing){
+    if (Array.isArray(thing))
+            return pickRandomWord(thing);
+    return pickRandomProperty(thing);
 }
 
-function generate(amount){
+function getNextWord(keys) {
+    var obj = markovMap;
+    
+    for (var i = 0; i<keys.length; ++i){
+        var key = keys[i];
+        if (!(key in obj)){
+            return pickRandom(obj);
+        }
+        obj = obj[key];
+    }
+
+    return pickRandom(obj)
+}
+
+function generate(amount, chainlength){
     var result = [];
-    var w1 = pickRandomProperty(markovMap);
-    var obj1 = markovMap[w1];
-    var w2 = pickRandomProperty(obj1);
+    var keys = [];
+
+    keys.push(pickRandom(markovMap));
+
     var lines = 1;
     for (var x = 0; x < amount; ++x) {
-        var wx = getNextWord(w1,w2);
+        var wx = getNextWord(keys);
         result.push(wx);
         if ((x+1) % 13 == 0){
             result.push("<BR/>");
@@ -74,16 +98,22 @@ function generate(amount){
                 result.push("<BR/>");
             }
         }
-        w1 = w2;
-        w2 = wx;
+        keys.push(wx);
+        while (keys.length > chainlength){
+            keys.shift();
+        }
     }
     
     return result.join(" ");
 }
 
-function generateText(source, amount) {
-    populateMap(source);
-    return generate(amount);
+function generateText(source, amount, chainlength) {
+    var cl = 2;
+    if (chainlength){
+        cl = chainlength;
+    }
+    populateMap(source, cl);
+    return generate(amount, cl);
 }
 
 

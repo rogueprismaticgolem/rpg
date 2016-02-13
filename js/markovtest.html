@@ -3,20 +3,36 @@
         <script src='markov.js'></script>
         <script>
             function captureForm(){
+                try
+                {
                 var amount = parseInt(document.getElementById("amount").value);
+                var chainlength = parseInt(document.getElementById("chainlength").value);
                 var source = document.getElementById("source").value;
                 console.log(amount);
-                document.getElementById('output').innerHTML = generateText(source, amount);
+                document.getElementById('status').innerHTML = '<b>Words to Output:</b> '+amount+'<br /><b>Chain Length:</b> '+chainlength+'<br /><b>Output:</b><br />'
+                document.getElementById('output').innerHTML = generateText(source, amount, chainlength);
                 return false;
+            }
+            catch(err){
+                console.log(err);
+                document.getElementById('status').innerHTML = err;
+                document.getElementById('output').innerHTML = err;
+
+            }
+            finally{
+                return false;
+            }
             }
         </script>
     </head>
     <body>
         <textarea form-"markov" name='source' rows='20' cols='80' id='source' wrap='soft'></textarea>
             <form id='markov' onSubmit='return captureForm();' >
-            <input type='text' name='amount' id='amount' value='100' />
+                Word to output:<input type='text' name='amount' id='amount' value='50' /><br />
+                Chain Length:<input type='text' name='chainlength' id='chainlength' value='2' /><br />
             <input type='submit'></input>
-            </form>
-            <div id='output'></div>
+        </form>
+        <div id='status'></div>
+        <div id='output'></div>
     </body>
 </html>
