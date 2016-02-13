@@ -68,7 +68,7 @@ function generate(amount){
     for (var x = 0; x < amount; ++x) {
         var wx = getNextWord(w1,w2);
         result.push(wx);
-        if ((x+1) % 17 == 0){
+        if ((x+1) % 13 == 0){
             result.push("<BR/>");
             if (lines++ % 5 == 0){
                 result.push("<BR/>");
